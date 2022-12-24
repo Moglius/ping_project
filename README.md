@@ -1,2 +1,2 @@
 # ping_project
-ping host in local network through Async task, multi-threading and websockets.
+ping hosts in local network through Async task (Celery), multi-threading and websockets (Django Channels and Vue).
