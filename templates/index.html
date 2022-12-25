@@ -20,6 +20,11 @@
         <div class="row">
             <div class="col-10 mx-auto mt-5">
                 <h3 class="mb-3">Ping hosts:</h3>
+                <form class="mb-3" method="GET" id="task-form">
+                    <input type="hidden" id="postId" name="postId" value="{{job_id}}" />
+                    <button id="revokeBtn" type="submit" class="btn btn-warning">Revoke</button>
+                </form>
+
                 {% verbatim %}
                 <div id="app">
                     <template v-for="(value, key) in hosts">
@@ -300,7 +305,7 @@
         },
 
         created(){
-            const socket = new WebSocket(`ws://${window.location.host}/ws/ping/`);
+            const socket = new WebSocket(`ws://${window.location.host}/ws/ping2/`);
             let _this = this;
 
             socket.onmessage = function(event){
@@ -314,5 +319,22 @@
     createApp(PingApp).mount('#app')
 
 </script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js" 
+          integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
+            crossorigin="anonymous"></script>
+  
+    <script type="text/javascript">
+    $(document).on('submit','#task-form',function(e){
+        e.preventDefault();
+        $.ajax({
+            type:'GET',
+            url: `http://localhost:8000/task/${$("#postId").val()}/revoke/`,
+            success:function(){
+                $("#revokeBtn").attr("disabled", "disabled");
+                    }
+            })
+        });
+    </script>
 </body>
 </html>
