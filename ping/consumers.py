@@ -27,12 +27,15 @@ class Ping2Consumer(AsyncWebsocketConsumer):
     
     async def connect(self):
 
-        await self.channel_layer.group_add('ping2', self.channel_name)
+        task_id = self.scope['url_route']['kwargs']['task_id']
+
+        await self.channel_layer.group_add(f"ping2_{str(task_id)}", self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
 
-        await self.channel_layer.group_discard('ping2', self.channel_name)
+        task_id = self.scope['url_route']['kwargs']['task_id']
+        await self.channel_layer.group_discard(f"ping2_{str(task_id)}", self.channel_name)
 
     
     async def send_new_data(self, event):

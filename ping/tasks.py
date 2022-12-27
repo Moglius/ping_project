@@ -7,6 +7,8 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from channels.layers import get_channel_layer
 import asyncio
 
+from .models import Task
+
 channel_layer = get_channel_layer()
 executor = ThreadPoolExecutor(max_workers=50)
 
@@ -49,7 +51,7 @@ def ping_hosts():
 
 
 @shared_task
-def ping2_hosts():
+def ping2_hosts(task_id):
     
     def perform_ping(host):
         response = os.system("ping -c 1 -w 1 " + host + " >/dev/null")
@@ -60,6 +62,13 @@ def ping2_hosts():
             status = 'DOWN'
 
         return (host, status)
+
+    obj = Task.objects.get(
+        id=task_id
+    )
+
+    obj.status = 2
+    obj.save()
 
     for i in range(100):
         hosts = {}
@@ -80,11 +89,14 @@ def ping2_hosts():
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
             channel_layer.group_send(
-                'ping2',
+                f"ping2_{str(task_id)}",
                 {"type": "send_new_data",
                 "text": hosts
                 })
         )
+    
+    obj.status = 3
+    obj.save()
 
 
 @shared_task

@@ -10,27 +10,40 @@ from .models import Task
 # Create your views here.
 def index(request):
 
-    result = ping2_hosts.delay()
+    obj = Task.objects.create()
 
-    obj, created = Task.objects.get_or_create(
-        task_id=result.id
-    )
+    celery_task = ping2_hosts.delay(obj.pk)
+
+    obj.celery_task_id = celery_task.id
+    obj.save()
 
     context = {
-        'job_id': obj.id
+        'task_id': obj.id
     }
 
     return render(request, 'index.html', context=context)
 
 # Create your views here.
-def revoke_task(request, job_id):
+def revoke_task(request, task_id):
 
-    #ping2_hosts.delay()
-    #app.control.revoke('f6d3935f-940e-477e-9acf-fa07b6b1f15b', terminate=True, signal='SIGKILL')
     obj = Task.objects.get(
-        id=job_id
+        id=task_id
     )
 
-    app.control.revoke(obj.task_id, terminate=True, signal='SIGKILL')
+    app.control.revoke(obj.celery_task_id, terminate=True, signal='SIGKILL')
+
+    obj.status = 4
+    obj.save()
 
     return render(request, 'index.html')
+
+# Create your views here.
+def tasks_list(request):
+
+    tasks = Task.objects.all()[:10]
+
+    context = {
+        'tasks': tasks
+    }
+
+    return render(request, 'tasks.html', context)

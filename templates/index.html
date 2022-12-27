@@ -21,7 +21,7 @@
             <div class="col-10 mx-auto mt-5">
                 <h3 class="mb-3">Ping hosts:</h3>
                 <form class="mb-3" method="GET" id="task-form">
-                    <input type="hidden" id="postId" name="postId" value="{{job_id}}" />
+                    <input v-model="myInput" type="hidden" id="postId" name="postId" value="{{task_id}}" />
                     <button id="revokeBtn" type="submit" class="btn btn-warning">Revoke</button>
                 </form>
 
@@ -45,6 +45,7 @@
         data(){
             return {
                 message: 'Hello World',
+                myInput: "",
                 hosts: {
                     "192.168.0.1": "UKN",
                     "192.168.0.10": "UKN",
@@ -305,7 +306,8 @@
         },
 
         created(){
-            const socket = new WebSocket(`ws://${window.location.host}/ws/ping2/`);
+            
+            const socket = new WebSocket(`ws://${window.location.host}/ws/${document.getElementById('postId').value}/ping2/`);
             let _this = this;
 
             socket.onmessage = function(event){

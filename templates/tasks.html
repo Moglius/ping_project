@@ -19,8 +19,26 @@
     <div class="continer">
         <div class="row">
             <div class="col-10 mx-auto mt-5">
-                <h3 class="mb-3">Ping hosts:</h3>
-                
+                <h3 class="mb-3">Tasks list:</h3>
+                <table class="table col-8">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Task ID</th>
+                        <th scope="col">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <th scope="row">{{ task.pk }}</th>
+                            <td>{{ task.celery_task_id }}</td>
+                            <td>{{ task.get_state_display }}</td>
+                          </tr>
+                        {% endfor %}
+                      
+                    </tbody>
+                  </table>
             </div>
         </div>
     </div>
