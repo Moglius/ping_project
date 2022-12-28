@@ -12,331 +12,67 @@
     
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <title>Ping Website</title>
+    <title>Admin Tasks</title>
 </head>
 <body>
 
     <div class="continer">
+
         <div class="row">
+            <div class="col-10 mx-auto">
+                <div class="mb-3">
+                {% include "navbar.html" %}    
+                </div>
+            </div>
+        </div>
+        
+       
+        <div class="row">
+            <div class="col-10 mx-auto mt-2">
+                <h2 class="mb-3">Admin Tasks:</h2>
+            </div>
             <div class="col-10 mx-auto mt-5">
-                <h3 class="mb-3">Ping hosts:</h3>
-                <form class="mb-3" method="GET" id="task-form">
-                    <input v-model="myInput" type="hidden" id="postId" name="postId" value="{{task_id}}" />
-                    <button id="revokeBtn" type="submit" class="btn btn-warning">Revoke</button>
+                <h3 class="mb-3">Ping Hosts:</h3>
+                
+                <form action="{% url 'ping_task_create' %}" method="post">
+                    {% csrf_token %}
+                    <input type="text" name="ping_hosts" placeholder="host1,host2,hostN">
+                    <input type="submit" value="Start" class="btn btn-primary">
                 </form>
 
-                {% verbatim %}
-                <div id="app">
-                    <template v-for="(value, key) in hosts">
-                        <span class="mr-2 badge badge-pill badge-success" v-if="value === 'UP'">{{key}}</span>
-                        <span class="mr-2 badge badge-pill badge-danger" v-if="value === 'DOWN'">{{key}}</span>
-                        <span class="mr-2 badge badge-pill badge-secondary" v-if="value === 'UKN'">{{key}}</span>
-                    </template>
-                </div>
-                {% endverbatim %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-10 mx-auto mt-5">
+                <h3 class="mb-3">AD Computer Search:</h3>
+
+             
+                <form class="col-5" action="{% url 'adsearch_task_create' %}" method="post">
+                    {% csrf_token %}
+                    <input type="text" name="adsearch_host">
+                    <select id="domains" name="domains" class="form-control">
+                        {% for domain in domains %}
+                        <option value="{{ domain.0 }}">{{ domain.1 }}</option>
+                        {% endfor %}
+                    </select> 
+                    <input type="submit" value="Start" class="btn btn-primary">
+                </form>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-10 mx-auto mt-5">
+                <h3 class="mb-3">Create Migration CSV:</h3>       
+                <form class="col-10" action="{% url 'export_csv' %}" method="post">
+                    {% csrf_token %}
+                    <textarea class="form-control" id="bolt_output" rows="25" name="bolt_output"></textarea>
+                    <input type="submit" value="Export" class="btn btn-primary">
+                </form>
+
             </div>
         </div>
     </div>
 
-<script>
-    const { createApp } = Vue;
-
-    const PingApp = {
-        data(){
-            return {
-                message: 'Hello World',
-                myInput: "",
-                hosts: {
-                    "192.168.0.1": "UKN",
-                    "192.168.0.10": "UKN",
-                    "192.168.0.100": "UKN",
-                    "192.168.0.101": "UKN",
-                    "192.168.0.102": "UKN",
-                    "192.168.0.103": "UKN",
-                    "192.168.0.104": "UKN",
-                    "192.168.0.105": "UKN",
-                    "192.168.0.106": "UKN",
-                    "192.168.0.107": "UKN",
-                    "192.168.0.108": "UKN",
-                    "192.168.0.109": "UKN",
-                    "192.168.0.11": "UKN",
-                    "192.168.0.110": "UKN",
-                    "192.168.0.111": "UKN",
-                    "192.168.0.112": "UKN",
-                    "192.168.0.113": "UKN",
-                    "192.168.0.114": "UKN",
-                    "192.168.0.115": "UKN",
-                    "192.168.0.116": "UKN",
-                    "192.168.0.117": "UKN",
-                    "192.168.0.118": "UKN",
-                    "192.168.0.119": "UKN",
-                    "192.168.0.12": "UKN",
-                    "192.168.0.120": "UKN",
-                    "192.168.0.121": "UKN",
-                    "192.168.0.122": "UKN",
-                    "192.168.0.123": "UKN",
-                    "192.168.0.124": "UKN",
-                    "192.168.0.125": "UKN",
-                    "192.168.0.126": "UKN",
-                    "192.168.0.127": "UKN",
-                    "192.168.0.128": "UKN",
-                    "192.168.0.129": "UKN",
-                    "192.168.0.13": "UKN",
-                    "192.168.0.130": "UKN",
-                    "192.168.0.131": "UKN",
-                    "192.168.0.132": "UKN",
-                    "192.168.0.133": "UKN",
-                    "192.168.0.134": "UKN",
-                    "192.168.0.135": "UKN",
-                    "192.168.0.136": "UKN",
-                    "192.168.0.137": "UKN",
-                    "192.168.0.138": "UKN",
-                    "192.168.0.139": "UKN",
-                    "192.168.0.14": "UKN",
-                    "192.168.0.140": "UKN",
-                    "192.168.0.141": "UKN",
-                    "192.168.0.142": "UKN",
-                    "192.168.0.143": "UKN",
-                    "192.168.0.144": "UKN",
-                    "192.168.0.145": "UKN",
-                    "192.168.0.146": "UKN",
-                    "192.168.0.147": "UKN",
-                    "192.168.0.148": "UKN",
-                    "192.168.0.149": "UKN",
-                    "192.168.0.15": "UKN",
-                    "192.168.0.150": "UKN",
-                    "192.168.0.151": "UKN",
-                    "192.168.0.152": "UKN",
-                    "192.168.0.153": "UKN",
-                    "192.168.0.154": "UKN",
-                    "192.168.0.155": "UKN",
-                    "192.168.0.156": "UKN",
-                    "192.168.0.157": "UKN",
-                    "192.168.0.158": "UKN",
-                    "192.168.0.159": "UKN",
-                    "192.168.0.16": "UKN",
-                    "192.168.0.160": "UKN",
-                    "192.168.0.161": "UKN",
-                    "192.168.0.162": "UKN",
-                    "192.168.0.163": "UKN",
-                    "192.168.0.164": "UKN",
-                    "192.168.0.165": "UKN",
-                    "192.168.0.166": "UKN",
-                    "192.168.0.167": "UKN",
-                    "192.168.0.168": "UKN",
-                    "192.168.0.169": "UKN",
-                    "192.168.0.17": "UKN",
-                    "192.168.0.170": "UKN",
-                    "192.168.0.171": "UKN",
-                    "192.168.0.172": "UKN",
-                    "192.168.0.173": "UKN",
-                    "192.168.0.174": "UKN",
-                    "192.168.0.175": "UKN",
-                    "192.168.0.176": "UKN",
-                    "192.168.0.177": "UKN",
-                    "192.168.0.178": "UKN",
-                    "192.168.0.179": "UKN",
-                    "192.168.0.18": "UKN",
-                    "192.168.0.180": "UKN",
-                    "192.168.0.181": "UKN",
-                    "192.168.0.182": "UKN",
-                    "192.168.0.183": "UKN",
-                    "192.168.0.184": "UKN",
-                    "192.168.0.185": "UKN",
-                    "192.168.0.186": "UKN",
-                    "192.168.0.187": "UKN",
-                    "192.168.0.188": "UKN",
-                    "192.168.0.189": "UKN",
-                    "192.168.0.19": "UKN",
-                    "192.168.0.190": "UKN",
-                    "192.168.0.191": "UKN",
-                    "192.168.0.192": "UKN",
-                    "192.168.0.193": "UKN",
-                    "192.168.0.194": "UKN",
-                    "192.168.0.195": "UKN",
-                    "192.168.0.196": "UKN",
-                    "192.168.0.197": "UKN",
-                    "192.168.0.198": "UKN",
-                    "192.168.0.199": "UKN",
-                    "192.168.0.2": "UKN",
-                    "192.168.0.20": "UKN",
-                    "192.168.0.200": "UKN",
-                    "192.168.0.201": "UKN",
-                    "192.168.0.202": "UKN",
-                    "192.168.0.203": "UKN",
-                    "192.168.0.204": "UKN",
-                    "192.168.0.205": "UKN",
-                    "192.168.0.206": "UKN",
-                    "192.168.0.207": "UKN",
-                    "192.168.0.208": "UKN",
-                    "192.168.0.209": "UKN",
-                    "192.168.0.21": "UKN",
-                    "192.168.0.210": "UKN",
-                    "192.168.0.211": "UKN",
-                    "192.168.0.212": "UKN",
-                    "192.168.0.213": "UKN",
-                    "192.168.0.214": "UKN",
-                    "192.168.0.215": "UKN",
-                    "192.168.0.216": "UKN",
-                    "192.168.0.217": "UKN",
-                    "192.168.0.218": "UKN",
-                    "192.168.0.219": "UKN",
-                    "192.168.0.22": "UKN",
-                    "192.168.0.220": "UKN",
-                    "192.168.0.221": "UKN",
-                    "192.168.0.222": "UKN",
-                    "192.168.0.223": "UKN",
-                    "192.168.0.224": "UKN",
-                    "192.168.0.225": "UKN",
-                    "192.168.0.226": "UKN",
-                    "192.168.0.227": "UKN",
-                    "192.168.0.228": "UKN",
-                    "192.168.0.229": "UKN",
-                    "192.168.0.23": "UKN",
-                    "192.168.0.230": "UKN",
-                    "192.168.0.231": "UKN",
-                    "192.168.0.232": "UKN",
-                    "192.168.0.233": "UKN",
-                    "192.168.0.234": "UKN",
-                    "192.168.0.235": "UKN",
-                    "192.168.0.236": "UKN",
-                    "192.168.0.237": "UKN",
-                    "192.168.0.238": "UKN",
-                    "192.168.0.239": "UKN",
-                    "192.168.0.24": "UKN",
-                    "192.168.0.240": "UKN",
-                    "192.168.0.241": "UKN",
-                    "192.168.0.242": "UKN",
-                    "192.168.0.243": "UKN",
-                    "192.168.0.244": "UKN",
-                    "192.168.0.245": "UKN",
-                    "192.168.0.246": "UKN",
-                    "192.168.0.247": "UKN",
-                    "192.168.0.248": "UKN",
-                    "192.168.0.249": "UKN",
-                    "192.168.0.25": "UKN",
-                    "192.168.0.250": "UKN",
-                    "192.168.0.251": "UKN",
-                    "192.168.0.252": "UKN",
-                    "192.168.0.253": "UKN",
-                    "192.168.0.254": "UKN",
-                    "192.168.0.26": "UKN",
-                    "192.168.0.27": "UKN",
-                    "192.168.0.28": "UKN",
-                    "192.168.0.29": "UKN",
-                    "192.168.0.3": "UKN",
-                    "192.168.0.30": "UKN",
-                    "192.168.0.31": "UKN",
-                    "192.168.0.32": "UKN",
-                    "192.168.0.33": "UKN",
-                    "192.168.0.34": "UKN",
-                    "192.168.0.35": "UKN",
-                    "192.168.0.36": "UKN",
-                    "192.168.0.37": "UKN",
-                    "192.168.0.38": "UKN",
-                    "192.168.0.39": "UKN",
-                    "192.168.0.4": "UKN",
-                    "192.168.0.40": "UKN",
-                    "192.168.0.41": "UKN",
-                    "192.168.0.42": "UKN",
-                    "192.168.0.43": "UKN",
-                    "192.168.0.44": "UKN",
-                    "192.168.0.45": "UKN",
-                    "192.168.0.46": "UKN",
-                    "192.168.0.47": "UKN",
-                    "192.168.0.48": "UKN",
-                    "192.168.0.49": "UKN",
-                    "192.168.0.5": "UKN",
-                    "192.168.0.50": "UKN",
-                    "192.168.0.51": "UKN",
-                    "192.168.0.52": "UKN",
-                    "192.168.0.53": "UKN",
-                    "192.168.0.54": "UKN",
-                    "192.168.0.55": "UKN",
-                    "192.168.0.56": "UKN",
-                    "192.168.0.57": "UKN",
-                    "192.168.0.58": "UKN",
-                    "192.168.0.59": "UKN",
-                    "192.168.0.6": "UKN",
-                    "192.168.0.60": "UKN",
-                    "192.168.0.61": "UKN",
-                    "192.168.0.62": "UKN",
-                    "192.168.0.63": "UKN",
-                    "192.168.0.64": "UKN",
-                    "192.168.0.65": "UKN",
-                    "192.168.0.66": "UKN",
-                    "192.168.0.67": "UKN",
-                    "192.168.0.68": "UKN",
-                    "192.168.0.69": "UKN",
-                    "192.168.0.7": "UKN",
-                    "192.168.0.70": "UKN",
-                    "192.168.0.71": "UKN",
-                    "192.168.0.72": "UKN",
-                    "192.168.0.73": "UKN",
-                    "192.168.0.74": "UKN",
-                    "192.168.0.75": "UKN",
-                    "192.168.0.76": "UKN",
-                    "192.168.0.77": "UKN",
-                    "192.168.0.78": "UKN",
-                    "192.168.0.79": "UKN",
-                    "192.168.0.8": "UKN",
-                    "192.168.0.80": "UKN",
-                    "192.168.0.81": "UKN",
-                    "192.168.0.82": "UKN",
-                    "192.168.0.83": "UKN",
-                    "192.168.0.84": "UKN",
-                    "192.168.0.85": "UKN",
-                    "192.168.0.86": "UKN",
-                    "192.168.0.87": "UKN",
-                    "192.168.0.88": "UKN",
-                    "192.168.0.89": "UKN",
-                    "192.168.0.9": "UKN",
-                    "192.168.0.90": "UKN",
-                    "192.168.0.91": "UKN",
-                    "192.168.0.92": "UKN",
-                    "192.168.0.93": "UKN",
-                    "192.168.0.94": "UKN",
-                    "192.168.0.95": "UKN",
-                    "192.168.0.96": "UKN",
-                    "192.168.0.97": "UKN",
-                    "192.168.0.98": "UKN",
-                    "192.168.0.99": "UKN"
-                }
-            }
-        },
-
-        created(){
-            
-            const socket = new WebSocket(`ws://${window.location.host}/ws/${document.getElementById('postId').value}/ping2/`);
-            let _this = this;
-
-            socket.onmessage = function(event){
-                _this.hosts = JSON.parse(event.data);
-                console.log(_this.hosts);
-            }
-
-        }
-    }
-
-    createApp(PingApp).mount('#app')
-
-</script>
-
-<script src="https://code.jquery.com/jquery-3.5.1.js" 
-          integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
-            crossorigin="anonymous"></script>
-  
-    <script type="text/javascript">
-    $(document).on('submit','#task-form',function(e){
-        e.preventDefault();
-        $.ajax({
-            type:'GET',
-            url: `http://localhost:8000/task/${$("#postId").val()}/revoke/`,
-            success:function(){
-                $("#revokeBtn").attr("disabled", "disabled");
-                    }
-            })
-        });
-    </script>
 </body>
 </html>

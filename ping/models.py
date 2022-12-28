@@ -1,5 +1,17 @@
 from django.db import models
 
+
+class Host(models.Model):
+
+    hostname = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.hostname
+    
+    class Meta:
+        ordering = ('-id',)
+
+
 # Create your models here.
 class Task(models.Model):
 
@@ -12,6 +24,7 @@ class Task(models.Model):
 
     celery_task_id = models.CharField(max_length=255, blank=True, null=True)
     status = models.IntegerField(choices=states, default=1)
+    hosts = models.ManyToManyField(Host)
 
     def __str__(self):
         return self.celery_task_id

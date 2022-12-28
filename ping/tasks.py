@@ -8,9 +8,13 @@ from channels.layers import get_channel_layer
 import asyncio
 
 from .models import Task
+import time
 
 channel_layer = get_channel_layer()
 executor = ThreadPoolExecutor(max_workers=50)
+
+ITERATION_MAX = 100
+
 
 @shared_task
 def ping_hosts():
@@ -70,15 +74,13 @@ def ping2_hosts(task_id):
     obj.status = 2
     obj.save()
 
-    for i in range(100):
+    for i in range(ITERATION_MAX):
         hosts = {}
         futures = []
 
-        for i in range(1,255):
+        for host in obj.hosts.all():
 
-            host = "192.168.0." + str(i)
-
-            futures.append(executor.submit(perform_ping, host))
+            futures.append(executor.submit(perform_ping, host.hostname))
     
         completed, pending = wait(futures)
 
@@ -86,14 +88,22 @@ def ping2_hosts(task_id):
             result = task.result()
             hosts[result[0]] = result[1]
 
+        return_data = {
+            'cur_iteration': i,
+            'end_iteration': ITERATION_MAX,
+            'hosts': hosts
+        }
+
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
             channel_layer.group_send(
                 f"ping2_{str(task_id)}",
                 {"type": "send_new_data",
-                "text": hosts
+                "text": return_data
                 })
         )
+
+        time.sleep(3)
     
     obj.status = 3
     obj.save()

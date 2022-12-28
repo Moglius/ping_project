@@ -17,8 +17,17 @@
 <body>
 
     <div class="continer">
+
+
         <div class="row">
-            <div class="col-10 mx-auto mt-5">
+            <div class="col-10 mx-auto">
+                <div class="mb-3">
+                {% include "navbar.html" %}    
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-10 mx-auto mt-2">
                 <h3 class="mb-3">Tasks list:</h3>
                 <table class="table col-8">
                     <thead>
@@ -30,10 +39,11 @@
                     </thead>
                     <tbody>
                         {% for task in tasks %}
-                        <tr>
-                            <th scope="row">{{ task.pk }}</th>
-                            <td>{{ task.celery_task_id }}</td>
-                            <td>{{ task.get_state_display }}</td>
+                        
+                          <tr>
+                            <th scope="row"><a href="{% url 'ping_task_run' task.id %}">{{ task.pk }}</a></th>
+                              <td>{{ task.celery_task_id }}</td>
+                              <td>{{ task.get_state_display }}</td>
                           </tr>
                         {% endfor %}
                       
