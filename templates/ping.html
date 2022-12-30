@@ -66,17 +66,34 @@
         },
 
         created(){
-            
-            const socket = new WebSocket(`ws://${window.location.host}/ws/${document.getElementById('postId').value}/ping2/`);
-            let _this = this;
 
-            socket.onmessage = function(event){
-                let data_received = JSON.parse(event.data);
-                _this.hosts = data_received.hosts;
-                _this.cur_iteration = data_received.cur_iteration;
-                _this.end_iteration = data_received.end_iteration;
-                console.log(data_received);
+            function connect(_this) {
+            
+                const socket = new WebSocket(`ws://${window.location.host}/ws/${document.getElementById('postId').value}/ping2/`);
+
+                socket.onmessage = function(event){
+                    let data_received = JSON.parse(event.data);
+                    _this.hosts = data_received.hosts;
+                    _this.cur_iteration = data_received.cur_iteration;
+                    _this.end_iteration = data_received.end_iteration;
+                    console.log(data_received);
+                }
+
+                socket.onclose = function(event) {
+                    console.log('Socket is closed. Reconnect will be attempted in 5 second.', event.reason);
+                    setTimeout(function() {
+                        connect(_this);
+                    }, 5000);
+                };
+
+                socket.onerror = function(err) {
+                    console.error('Socket encountered error: ', err.message, 'Closing socket');
+                    socket.close();
+                };
             }
+
+            let _this = this;
+            connect(_this);
 
         }
     }

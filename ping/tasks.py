@@ -89,7 +89,7 @@ def ping2_hosts(task_id):
             hosts[result[0]] = result[1]
 
         return_data = {
-            'cur_iteration': i,
+            'cur_iteration': i+1,
             'end_iteration': ITERATION_MAX,
             'hosts': hosts
         }
