@@ -13,3 +13,6 @@ ping hosts in local network through Async task (Celery), multi-threading and web
 
 ### Tasks list
 ![Tasks List](img/tasks_list.jpeg "Tasks List")
+
+### Task results
+![Task Results](img/task_results.jpeg "Task Results")

@@ -35,17 +35,17 @@
             </div>
         </div>
 
-        <div class="row ml-3">
+        <div class="row ml-5 mr-5">
           {% for host_status in task.hosts.all %}
-          <div class="col-5 mx-auto mt-2">
+          <div class="col-3 mx-auto mt-2">
             <h4>{{ host_status.host.hostname }}:</h4>
             <div class="progress">
               {% for result in host_status.results %}
 
               {% if result.1 == 'UP' %}
-              <div data-toggle="tooltip" data-placement="top" title="{{result.0}}% {{result.1}}" class="progress-bar bg-success" role="progressbar" style="width: {{ result.0 }}%" aria-valuenow="{{ result.0 }}" aria-valuemin="0" aria-valuemax="100">{% if result.0 > 4 %}{{result.0}}%{% endif %}</div>
+              <div data-toggle="tooltip" data-placement="top" title="{{result.0}}% {{result.1}}" class="progress-bar bg-success" role="progressbar" style="width: {{ result.0 }}%" aria-valuenow="{{ result.0 }}" aria-valuemin="0" aria-valuemax="100">{% if result.0 > 8 %}{{result.0}}%{% endif %}</div>
               {% else %}
-              <div data-toggle="tooltip" data-placement="top" title="{{result.0}}% {{result.1}}" class="progress-bar bg-danger" role="progressbar" style="width: {{ result.0 }}%" aria-valuenow="{{ result.0 }}" aria-valuemin="0" aria-valuemax="100">{% if result.0 > 4 %}{{result.0}}%{% endif %}</div>
+              <div data-toggle="tooltip" data-placement="top" title="{{result.0}}% {{result.1}}" class="progress-bar bg-danger" role="progressbar" style="width: {{ result.0 }}%" aria-valuenow="{{ result.0 }}" aria-valuemin="0" aria-valuemax="100">{% if result.0 > 8 %}{{result.0}}%{% endif %}</div>
               {% endif %}
               
               {% endfor%}
