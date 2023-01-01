@@ -19,7 +19,7 @@ class HostStatus(models.Model):
     def results(self):
 
         status_str, len_status = self.status, len(self.status)
-        left, rigth, count, grand_total = 0,0,0,0
+        left, rigth, count, grand_total, count_grand_total = 0,0,0,0,0
         cur_status = ''
 
         output_arr = []
@@ -38,13 +38,12 @@ class HostStatus(models.Model):
             elif status_str[rigth] != status_str[left]:
                 percentage = (count * 100) // len_status
                 grand_total += percentage
+                count_grand_total += count
                 left = rigth
-                output_arr.append((percentage,cur_status))
+                output_arr.append((percentage,cur_status, count))
                 count = 0
         
-        output_arr.append((100 - grand_total,cur_status))
-
-        print(output_arr)
+        output_arr.append((100 - grand_total,cur_status, len_status-count_grand_total))
 
         return output_arr
 

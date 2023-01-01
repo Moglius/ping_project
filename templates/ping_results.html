@@ -43,9 +43,9 @@
               {% for result in host_status.results %}
 
               {% if result.1 == 'UP' %}
-              <div data-toggle="tooltip" data-placement="top" title="{{result.0}}% {{result.1}}" class="progress-bar bg-success" role="progressbar" style="width: {{ result.0 }}%" aria-valuenow="{{ result.0 }}" aria-valuemin="0" aria-valuemax="100">{% if result.0 > 8 %}{{result.0}}%{% endif %}</div>
+              <div data-toggle="tooltip" data-placement="top" title="{{result.0}}% {{result.1}} ({{result.2}} packets)" class="progress-bar bg-success" role="progressbar" style="width: {{ result.0 }}%" aria-valuenow="{{ result.0 }}" aria-valuemin="0" aria-valuemax="100">{% if result.0 > 8 %}{{result.0}}%{% endif %}</div>
               {% else %}
-              <div data-toggle="tooltip" data-placement="top" title="{{result.0}}% {{result.1}}" class="progress-bar bg-danger" role="progressbar" style="width: {{ result.0 }}%" aria-valuenow="{{ result.0 }}" aria-valuemin="0" aria-valuemax="100">{% if result.0 > 8 %}{{result.0}}%{% endif %}</div>
+              <div data-toggle="tooltip" data-placement="top" title="{{result.0}}% {{result.1}} ({{result.2}} packets)" class="progress-bar bg-danger" role="progressbar" style="width: {{ result.0 }}%" aria-valuenow="{{ result.0 }}" aria-valuemin="0" aria-valuemax="100">{% if result.0 > 8 %}{{result.0}}%{% endif %}</div>
               {% endif %}
               
               {% endfor%}
