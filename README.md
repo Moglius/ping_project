@@ -7,7 +7,7 @@ Ping hosts in local network through Async task (Celery), multi-threading and web
 
 ![Diagram](img/diagram.png "Diagram")
 
-## Screenshot
+## Screenshots
 
 ### Receive json from websocket
 ![Json data](img/ping_hosts.jpeg "Receive json from websockets")
