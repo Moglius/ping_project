@@ -9,7 +9,7 @@ from .tasks import ping2_hosts
 
 from ping_project.celery import app
 
-from .models import Task, Host
+from .models import Task, Host, HostStatus
 
 domains = (
     (1, "NA"),
@@ -37,7 +37,8 @@ def ping_task_create(request):
 
         for host in hosts:
             host_obj, created = Host.objects.get_or_create(hostname=host)
-            task_obj.hosts.add(host_obj)
+            host_status_obj = HostStatus.objects.create(host=host_obj)
+            task_obj.hosts.add(host_status_obj)
 
         celery_task = ping2_hosts.delay(task_obj.pk)
 
@@ -58,8 +59,13 @@ def ping_task_create(request):
 # Create your views here.
 def ping_task_run(request, task_id):
 
+    task = Task.objects.get(
+        id=task_id
+    )
+
     context = {
-       'task_id': task_id
+       'task_id': task_id,
+       'task': task
     }
 
     return render(request, 'ping.html', context=context)
@@ -127,3 +133,20 @@ def export_csv(request):
     writer.writerow(['Second row', 'A', 'B', 'C', '"Testing"', "Here's a quote"])
 
     return response
+
+
+def ping_task_results(request, task_id):
+
+    task = Task.objects.get(
+        id=task_id
+    )
+
+    if task.get_state_display() in ['done', 'revoked']:
+
+        context = {
+            'task': task
+        }
+
+        return render(request, 'ping_results.html', context=context)
+    
+    return render(request, 'index.html')

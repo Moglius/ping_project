@@ -78,9 +78,9 @@ def ping2_hosts(task_id):
         hosts = {}
         futures = []
 
-        for host in obj.hosts.all():
+        for host_status in obj.hosts.all():
 
-            futures.append(executor.submit(perform_ping, host.hostname))
+            futures.append(executor.submit(perform_ping, host_status.host.hostname))
     
         completed, pending = wait(futures)
 
@@ -102,6 +102,14 @@ def ping2_hosts(task_id):
                 "text": return_data
                 })
         )
+
+        for host_status in obj.hosts.all():
+            hostname = host_status.host.hostname
+            if hosts[hostname] == 'UP':
+                host_status.status = host_status.status + '1'
+            else:
+                host_status.status = host_status.status + '0'
+            host_status.save()
 
         time.sleep(3)
     
