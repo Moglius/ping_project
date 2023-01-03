@@ -13,7 +13,7 @@ import time
 channel_layer = get_channel_layer()
 executor = ThreadPoolExecutor(max_workers=50)
 
-ITERATION_MAX = 100
+ITERATION_MAX = 10
 
 
 @shared_task
@@ -94,15 +94,6 @@ def ping2_hosts(task_id):
             'hosts': hosts
         }
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(
-            channel_layer.group_send(
-                f"ping2_{str(task_id)}",
-                {"type": "send_new_data",
-                "text": return_data
-                })
-        )
-
         for host_status in obj.hosts.all():
             hostname = host_status.host.hostname
             if hosts[hostname] == 'UP':
@@ -110,11 +101,35 @@ def ping2_hosts(task_id):
             else:
                 host_status.status = host_status.status + '0'
             host_status.save()
+        
+        if i < (ITERATION_MAX-1):
 
-        time.sleep(3)
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(
+                channel_layer.group_send(
+                    f"ping2_{str(task_id)}",
+                    {"type": "send_new_data",
+                    "text": return_data
+                    })
+            )
+            time.sleep(3)
+        else:
+            obj.status = 3
+            obj.save()
+            
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(
+                channel_layer.group_send(
+                    f"ping2_{str(task_id)}",
+                    {"type": "send_new_data",
+                    "text": return_data
+                    })
+            )
+        
+
+        
     
-    obj.status = 3
-    obj.save()
+    
 
 
 @shared_task

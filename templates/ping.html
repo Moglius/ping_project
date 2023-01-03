@@ -84,6 +84,11 @@
                     _this.cur_iteration = data_received.cur_iteration;
                     _this.end_iteration = data_received.end_iteration;
                     console.log(data_received);
+
+                    if (_this.cur_iteration === _this.end_iteration) {
+                        location.reload();
+                    }
+
                 }
 
                 socket.onclose = function(event) {
