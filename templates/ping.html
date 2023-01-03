@@ -92,10 +92,10 @@
                 }
 
                 socket.onclose = function(event) {
-                    console.log('Socket is closed. Reconnect will be attempted in 5 second.', event.reason);
+                    console.log('Socket is closed. Reconnect will be attempted in 15 second.', event.reason);
                     setTimeout(function() {
                         connect(_this);
-                    }, 5000);
+                    }, 15000);
                 };
 
                 socket.onerror = function(err) {
