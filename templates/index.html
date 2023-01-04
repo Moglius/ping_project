@@ -38,8 +38,8 @@
                 
                 <form action="{% url 'ping_task_create' %}" method="post">
                     {% csrf_token %}
-                    <input type="text" name="ping_hosts" placeholder="host1,host2,hostN">
-                    <input type="submit" value="Start" class="btn btn-primary">
+                    {{form.as_p}}
+                    <input type="submit" value="Start" class="btn btn-primary">        
                 </form>
 
             </div>

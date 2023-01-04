@@ -10,21 +10,14 @@ from .tasks import ping_hosts
 from ping_project.celery import app
 
 from .models import Task, Host, HostStatus
+from .forms import ServersForm
 
-domains = (
-    (1, "NA"),
-    (2, "UPS"),
-    (3, "EA"),
-    (4, "AP"),
-)
 
 def index(request):
 
-    context = {
-        'domains': domains
-    }
+    form = ServersForm()
 
-    return render(request, 'index.html', context=context)
+    return render(request, 'index.html', {'form': form})
 
 def ping_task_create(request):
 
@@ -32,27 +25,35 @@ def ping_task_create(request):
 
         task_obj = Task.objects.create()
 
-        hosts = request.POST['ping_hosts'].split(',')
+        form = ServersForm(request.POST)
 
-        for host in hosts:
-            host_obj, created = Host.objects.get_or_create(hostname=host)
-            host_status_obj = HostStatus.objects.create(host=host_obj)
-            task_obj.hosts.add(host_status_obj)
+        if form.is_valid():
+            hosts = form.cleaned_data['ping_hosts']
 
-        celery_task = ping_hosts.delay(task_obj.pk)
+            for host in hosts:
+                host_obj, created = Host.objects.get_or_create(hostname=host)
+                host_status_obj = HostStatus.objects.create(host=host_obj)
+                task_obj.hosts.add(host_status_obj)
 
-        task_obj.celery_task_id = celery_task.id
-        task_obj.save()
+            celery_task = ping_hosts.delay(task_obj.pk)
 
-        context = {
-            'task_id': task_obj.id
-        }
+            task_obj.celery_task_id = celery_task.id
+            task_obj.save()
 
-        url = reverse('ping_task_run', args=[task_obj.id])
+            context = {
+                'task_id': task_obj.id
+            }
 
-        return redirect(url, context)
+            url = reverse('ping_task_run', args=[task_obj.id])
 
-    return render(request, 'index.html')
+            return redirect(url, context)
+        else:
+
+            return render(request, 'index.html', {'form': form})
+
+    form = ServersForm()
+
+    return render(request, 'index.html', {'form': form})
 
 
 def ping_task_run(request, task_id):
