@@ -12,6 +12,31 @@ from ping_project.celery import app
 from .models import Task, Host, HostStatus
 from .forms import ServersForm
 
+# Global Vars
+REVOKE = 4
+
+# Helper functions
+
+def celery_run_task(task):
+    celery_task = ping_hosts.delay(task.pk)
+
+    task.celery_task_id = celery_task.id
+    task.save()
+
+def db_create_task_objects(hosts, task):
+
+    for host in hosts:
+        host_obj, created = Host.objects.get_or_create(hostname=host)
+        host_status_obj = HostStatus.objects.create(host=host_obj)
+        task.hosts.add(host_status_obj)
+
+def celery_set_task_state(task, state):
+    app.control.revoke(task.celery_task_id, terminate=True, signal='SIGKILL')
+
+    task.status = state
+    task.save()
+
+# Views (Controllers) from here 
 
 def index(request):
 
@@ -23,30 +48,18 @@ def ping_task_create(request):
 
     if request.method == 'POST':
 
-        task_obj = Task.objects.create()
+        task = Task.objects.create()
 
         form = ServersForm(request.POST)
 
         if form.is_valid():
-            hosts = form.cleaned_data['ping_hosts']
+            db_create_task_objects(form.cleaned_data['ping_hosts'], task)
 
-            for host in hosts:
-                host_obj, created = Host.objects.get_or_create(hostname=host)
-                host_status_obj = HostStatus.objects.create(host=host_obj)
-                task_obj.hosts.add(host_status_obj)
+            celery_run_task(task)
 
-            celery_task = ping_hosts.delay(task_obj.pk)
+            url = reverse('ping_task_run', args=[task.id])
 
-            task_obj.celery_task_id = celery_task.id
-            task_obj.save()
-
-            context = {
-                'task_id': task_obj.id
-            }
-
-            url = reverse('ping_task_run', args=[task_obj.id])
-
-            return redirect(url, context)
+            return redirect(url, {'task_id': task.id})
         else:
 
             return render(request, 'index.html', {'form': form})
@@ -70,38 +83,26 @@ def ping_task_run(request, task_id):
 
 def revoke_task(request, task_id):
 
-    obj = Task.objects.get(id=task_id)
+    task = Task.objects.get(id=task_id)
 
-    app.control.revoke(obj.celery_task_id, terminate=True, signal='SIGKILL')
-
-    obj.status = 4
-    obj.save()
+    celery_set_task_state(task, REVOKE)
 
     return render(request, 'index.html')
+
 
 def tasks_list(request):
 
     tasks = Task.objects.all()[:10]
 
-    context = {
-        'tasks': tasks
-    }
-
-    return render(request, 'tasks.html', context)
+    return render(request, 'tasks.html', {'tasks': tasks})
 
 
 def ping_task_results(request, task_id):
 
-    task = Task.objects.get(
-        id=task_id
-    )
+    task = Task.objects.get(id=task_id)
 
     if task.get_state_display() in ['done', 'revoked']:
 
-        context = {
-            'task': task
-        }
-
-        return render(request, 'ping_results.html', context=context)
+        return render(request, 'ping_results.html', {'task': task})
     
-    return render(request, 'index.html')
+    return redirect(reverse('index'))
