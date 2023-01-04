@@ -43,38 +43,7 @@
                 </form>
 
             </div>
-        </div>
-        <div class="row">
-            <div class="col-10 mx-auto mt-5">
-                <h3 class="mb-3">AD Computer Search:</h3>
-
-             
-                <form class="col-5" action="{% url 'adsearch_task_create' %}" method="post">
-                    {% csrf_token %}
-                    <input type="text" name="adsearch_host">
-                    <select id="domains" name="domains" class="form-control">
-                        {% for domain in domains %}
-                        <option value="{{ domain.0 }}">{{ domain.1 }}</option>
-                        {% endfor %}
-                    </select> 
-                    <input type="submit" value="Start" class="btn btn-primary">
-                </form>
-
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-10 mx-auto mt-5">
-                <h3 class="mb-3">Create Migration CSV:</h3>       
-                <form class="col-10" action="{% url 'export_csv' %}" method="post">
-                    {% csrf_token %}
-                    <textarea class="form-control" id="bolt_output" rows="25" name="bolt_output"></textarea>
-                    <input type="submit" value="Export" class="btn btn-primary">
-                </form>
-
-            </div>
-        </div>
-          
+        </div>          
     </div>
 
 </body>

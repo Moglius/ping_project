@@ -44,7 +44,7 @@
                 {% verbatim %}
                 <div id="app">
                     <div >
-                        <p>Iteration: {{ cur_iteration }} from {{end_iteration}}</p>
+                        <h4>Iteration: {{ cur_iteration }} out of {{end_iteration}}</h4>
                     </div>
 
                     <div>
@@ -76,7 +76,7 @@
 
             function connect(_this) {
             
-                const socket = new WebSocket(`ws://${window.location.host}/ws/${document.getElementById('postId').value}/ping2/`);
+                const socket = new WebSocket(`ws://${window.location.host}/ws/${document.getElementById('postId').value}/ping/`);
 
                 socket.onmessage = function(event){
                     let data_received = JSON.parse(event.data);
