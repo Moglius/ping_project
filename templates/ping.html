@@ -32,24 +32,36 @@
             <div class="col-10 mx-auto mt-2">
                 <h3 class="mb-3">Ping hosts <span class="badge badge-primary">{{ task.get_state_display }}</span>:</h3>
 
+                <div>
+                    {% for host_status in task.hosts.all %}
+                    <span class="mb-3 badge badge-pill badge-info">{{host_status.host.hostname}}</span>
+                    {% endfor %}
+                </div>
+                
+                <div>
                 {% if task.get_state_display == 'done' or task.get_state_display == 'revoked' %}
                 <a class="btn btn-primary" href="{% url 'ping_task_results' task.id %}" role="button">Results</a>
+                <a class="btn btn-warning" href="{% url 'task_relaunch' task.id %}" role="button">Re-Launch</a>
                 {% else %}
-                <form class="mb-3" method="GET" id="task-form">
-                    <input v-model="myInput" type="hidden" id="postId" name="postId" value="{{task_id}}" />
-                    <button id="revokeBtn" type="submit" class="btn btn-warning">Revoke</button>
-                </form>
+                <a class="btn btn-danger" href="{% url 'revoke_task' task.id %}" role="button">Revoke</a>
                 {% endif %}
+                </div>
 
                 {% verbatim %}
                 <div id="app">
-                    <div >
-                        <h4>Iteration: {{ cur_iteration }} out of {{end_iteration}}</h4>
+                    <div class="mt-3">
+                        <h4>
+                            Iteration: {{ cur_iteration }} out of {{end_iteration}} | Websocket: 
+                            <span class="mr-2 badge badge-pill badge-secondary" v-if="ws_state === 0">Uknkown</span>
+                            <span class="mr-2 badge badge-pill badge-warning" v-if="ws_state === 1">Connecting</span>
+                            <span class="mr-2 badge badge-pill badge-success" v-if="ws_state === 2">Connected</span>
+                            <span class="mr-2 badge badge-pill badge-dark" v-if="ws_state === 3">Closed</span>
+                        </h4>
                     </div>
 
                     <div>
                         <template v-for="(value, key) in hosts">
-                            <span class="mr-2 badge badge-pill badge-success" v-if="value === 'UP'">{{key}}</span>
+                            <span class="mr-2 badge badge-pill badge-success" v-if="ws_state === 'UP'">{{key}}</span>
                             <span class="mr-2 badge badge-pill badge-danger" v-if="value === 'DOWN'">{{key}}</span>
                             <span class="mr-2 badge badge-pill badge-secondary" v-if="value === 'UKN'">{{key}}</span>
                         </template>
@@ -68,15 +80,31 @@
             return {
                 cur_iteration: 0,
                 end_iteration: 0,
+                task_id: {{task_id}},
+                ws_state: 0,
                 hosts: {}
             }
+        },
+
+        mounted() {
+            fetch(`http://${window.location.host}/task/${this.task_id}/json/`)
+            .then(response => response.json())
+            .then(data => {
+                this.hosts = data.hosts;
+            });
         },
 
         created(){
 
             function connect(_this) {
             
-                const socket = new WebSocket(`ws://${window.location.host}/ws/${document.getElementById('postId').value}/ping/`);
+                const socket = new WebSocket(`ws://${window.location.host}/ws/${_this.task_id}/ping/`);
+
+                _this.ws_state = 1;
+
+                socket.onopen = function(event){
+                    _this.ws_state = 2;
+                }
 
                 socket.onmessage = function(event){
                     let data_received = JSON.parse(event.data);
@@ -91,6 +119,7 @@
                 }
 
                 socket.onclose = function(event) {
+                    _this.ws_state = 3;
                     console.log('Socket is closed. Reconnect will be attempted in 15 second.', event.reason);
                     setTimeout(function() {
                         connect(_this);
@@ -112,22 +141,6 @@
     createApp(PingApp).mount('#app')
 
 </script>
-
-<script src="https://code.jquery.com/jquery-3.5.1.js" 
-          integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
-            crossorigin="anonymous"></script>
   
-    <script type="text/javascript">
-    $(document).on('submit','#task-form',function(e){
-        e.preventDefault();
-        $.ajax({
-            type:'GET',
-            url: `http://localhost:8000/task/${$("#postId").val()}/revoke/`,
-            success:function(){
-                $("#revokeBtn").attr("disabled", "disabled");
-                    }
-            })
-        });
-    </script>
 </body>
 </html>

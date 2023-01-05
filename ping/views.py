@@ -1,6 +1,6 @@
 import csv
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.shortcuts import redirect
 
@@ -35,6 +35,27 @@ def celery_set_task_state(task, state):
 
     task.status = state
     task.save()
+
+def db_clone_task(task_id):
+    old_task = Task.objects.get(id=task_id)
+    new_task = Task.objects.create()
+
+    servers = old_task.hosts.all().values_list('host__hostname', flat=True)
+
+    db_create_task_objects(servers, new_task)
+
+    return new_task
+    
+def create_hosts_json(task):
+
+    servers = task.hosts.all().values_list('host__hostname')
+
+    json_servers = {}
+
+    for server in servers:
+        json_servers[server[0]] = 'UKN'
+
+    return json_servers
 
 # Views (Controllers) from here 
 
@@ -87,7 +108,20 @@ def revoke_task(request, task_id):
 
     celery_set_task_state(task, REVOKE)
 
-    return render(request, 'index.html')
+    url = reverse('ping_task_run', args=[task.id])
+
+    return redirect(url, {'task_id': task.id})
+
+
+def task_relaunch(request, task_id):
+
+    task = db_clone_task(task_id)
+
+    celery_run_task(task)
+
+    url = reverse('ping_task_run', args=[task.id])
+
+    return redirect(url, {'task_id': task.id})
 
 
 def tasks_list(request):
@@ -106,3 +140,10 @@ def ping_task_results(request, task_id):
         return render(request, 'ping_results.html', {'task': task})
     
     return redirect(reverse('index'))
+
+def task_json(request, task_id):
+    task = Task.objects.get(id=task_id)
+
+    hosts = create_hosts_json(task)
+
+    return JsonResponse({'hosts': hosts})
