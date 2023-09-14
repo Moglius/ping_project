@@ -1,0 +1,14 @@
+# get all filesystem mounted:
+df -hTl -x tmpfs -x devtmpfs |grep -v "/boot"
+
+# check where root is mounted
+df /
+
+# 3 check if root partition is a lv
+lvdisplay /dev/mapper/rootvg-rootlv
+
+# if command above ok, is LV, now get vg name
+lvdisplay /dev/mapper/rootvg-rootlv |grep "VG Name" |awk '{print $3}'
+
+# if not, a command parition
+df -hTl -x tmpfs -x devtmpfs |grep -v "/boot" |grep -v rootvg
