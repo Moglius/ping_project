@@ -266,10 +266,10 @@ module "security_group_lambda" {
   source = "github.com/terraform-aws-modules/terraform-aws-security-group.git?ref=43974e94067251ee464018288aa44862d0adba22"
 
   name        = "${local.name}-sg"
-  description = "Security group for lambda to reach Infoblox"
+  description = "Security group for lambda to reach APO"
   vpc_id      = data.aws_vpc.lambda.id
 
-  egress_cidr_blocks = formatlist("%s/32", local.infoblox_endpoints_ips)
+  egress_cidr_blocks = formatlist("%s/32", local.api_endpoints_ips)
   egress_rules       = ["https-443-tcp"]
 
   egress_with_cidr_blocks = [
@@ -304,10 +304,6 @@ module "lambda" {
   }
 
   environment_variables = {
-    IB_API_IP_READ                          = var.infoblox_api_ip_read
-    IB_API_IP                               = var.infoblox_api_ip
-    INFOBLOX_USER                           = var.infoblox_api_user
-    INFOBLOX_SECRET                         = aws_secretsmanager_secret.infoblox.name
     AUDIT_CONFIG_AGGREGATOR_ASSUME_ROLE_ARN = var.audit_config_aggregator_assume_role_arn
     AUDIT_CONFIG_AGGREGATOR_NAME            = var.audit_config_aggregator_name
     AUDIT_CONFIG_AGGREGATOR_REGION          = var.audit_config_aggregator_region
@@ -330,32 +326,4 @@ module "lambda" {
   }
 
   publish = true
-}
-
-################################################################################
-# Secrets Manager for Infoblox Secrets
-################################################################################
-
-resource "aws_kms_key" "infoblox_secret" {
-  description             = "DNS Automation Infoblox Secrets Manager CMK"
-  deletion_window_in_days = 30
-  enable_key_rotation     = true
-  policy                  = data.aws_iam_policy_document.cmk_lambda.json
-}
-
-resource "aws_kms_alias" "infoblox_secret_cmk" {
-  name          = "alias/${local.name}-infoblox-secret-cmk"
-  target_key_id = aws_kms_key.infoblox_secret.key_id
-}
-
-resource "aws_secretsmanager_secret" "infoblox" {
-  #checkov:skip=CKV2_AWS_57: Infoblox API automation user password cannot have automatic rotation enabled since there is no integration between Infoblox and AWS Secrets Manager.
-  name                    = "${local.name}-${random_pet.this.id}-infoblox-secret"
-  recovery_window_in_days = 0 # Set to zero to force delete during Terraform destroy
-  kms_key_id              = aws_kms_key.infoblox_secret.key_id
-}
-
-resource "aws_secretsmanager_secret_version" "infoblox" {
-  secret_id     = aws_secretsmanager_secret.infoblox.id
-  secret_string = var.infoblox_api_password
 }
